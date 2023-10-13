@@ -18,7 +18,7 @@ def HtML_Template(articletag):
     return f'''
         <html>
         <body>
-            <h1>Django</h1>
+            <h1><a href ="/">Django</a></h1>
             <ol>
                 {ol}
             </ol>
@@ -39,5 +39,5 @@ def read(request, id):
     article = ''
     for topic in topics:
         if topic['id'] == int(id):
-            article = f'<h2> {topic["title"]}</h2>{topic["body"]}'
+            article = f'<h2> {topic["title"]}</h2>{topic["body"]}</h2>'
     return HttpResponse(HtML_Template(article))

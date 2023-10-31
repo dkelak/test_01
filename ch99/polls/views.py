@@ -1,7 +1,38 @@
-from django.shortcuts import render, HttpResponse
-from django.views.decorators.csrf import csrf_exempt    
-import random
+from django.shortcuts import get_object_or_404, render, HttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from polls.models import Choice, Question
+# from django.views.decorators.csrf import csrf_exempt    
+# import random
 
+def index(request):
+    latest_qusetion_list = Question.objects.all().order_by('-pub_date')[:5]
+    context = {'latest_qusetion_list' : latest_qusetion_list}
+    return render(request, 'poll/index.html', context)
+
+def detail(request, question_id):
+    question = get_object_or_404(Question, pk = question_id)
+    return render(request, 'polls/detail.html', {'question' : question})
+
+def vote(request, question_id):
+    question = get_object_or_404(Question, pk = question_id)
+    try:
+        selected_choice = question.choice_set.get(pk = request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        return render(request, 'polls/deteil.html',{
+            'question': question,
+            'error_message': "you didn't select a choice.",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        return HttpResponseRedirect(reverse('polls:results', args = (question.id,)))
+    
+def results(request, question_id):
+    question = get_object_or_404(Question, pk = question_id)
+    return render(request, 'polls/results.html', {'question': question})
+
+"""
 nextId = 4
 topics = [
     {'id' : 1, 'title': '전자통신컴퓨터공학부', 'body': '전자통신컴퓨터공학부에 오신걸 환영합니다.'},
@@ -61,3 +92,6 @@ def read(request, id):
         if topic['id'] == int(id):
             article = f'<h2> {topic["title"]}</h2>{topic["body"]}</h2>'
     return HttpResponse(HtML_Template(article))
+"""
+
+
